@@ -1,22 +1,23 @@
 *{box-sizing:border-box}
 body{margin:0;background:#f2f5f2;color:#203029;font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:#173b32;color:#fff;padding:24px max(18px,calc((100% - 800px)/2)) 0;padding-top:max(24px,env(safe-area-inset-top))}
+header{background:#173b32;color:#fff;padding:24px max(18px,calc((100% - 800px)/2)) 0;padding-top:max(24px,env(safe-area-inset-top));position:sticky;top:0;z-index:5}
 h1{margin:4px 0 14px}
 h1 span{font-size:1rem;font-weight:400}
-.abas{display:flex;gap:6px}
-.abas button{background:transparent;color:#cfe0d8;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 16px;font-weight:600}
+/* Abas: uma linha só, rolam para o lado no celular */
+.abas{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.abas::-webkit-scrollbar{display:none}
+.abas button{flex:0 0 auto;white-space:nowrap;background:transparent;color:#cfe0d8;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
 .abas button.ativa{color:#fff;border-bottom-color:#f2e6c8}
 main{max-width:800px;margin:24px auto;padding:0 16px}
 .card{background:#fff;border-radius:14px;padding:18px;margin-bottom:22px;box-shadow:0 3px 14px #0000000c}
 label{display:block;font-weight:600;margin-bottom:8px}
 input[type=search]{width:100%;padding:12px;border:1px solid #cbd5cf;border-radius:9px;font:inherit}
-.linhaFiltro{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.linhaFiltro{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:14px}
 .check{display:flex;align-items:center;gap:8px;margin:0}
 select{padding:10px;border:1px solid #cbd5cf;border-radius:9px;font:inherit;background:#fff;color:inherit}
 button,.item{padding:12px;border:1px solid #dce5df;border-radius:10px;background:#fff;color:inherit;cursor:pointer;font:inherit}
-.item{display:block;width:100%;text-align:left;margin:8px 0}
-.item b{color:#173b32;display:inline-block;min-width:3.4em}
-.item small{display:block;color:#68766e;margin-left:3.4em;font-size:.8em}
+.item{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;margin:8px 0}
+.item b{color:#173b32;flex:0 0 3.6em}
 .barra,.navHino{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .fonte{display:flex;gap:6px}
 .navHino{margin-top:24px}
@@ -31,6 +32,9 @@ button,.item{padding:12px;border:1px solid #dce5df;border-radius:10px;background
 #texto .rotulo{display:block;font-size:.75em;font-weight:700;color:#68766e;font-style:normal}
 #partitura{overflow-x:auto}
 #partitura canvas{display:block;margin:0 auto;background:#fff}
+#vazio{color:#68766e}
+#vazio .outras{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#vazio .outras button{padding:8px 12px;font-size:.9rem}
 .nota{color:#68766e}
 footer{text-align:center;padding:30px;color:#68766e}
 #visor{position:fixed;inset:0;background:#e9ece9;z-index:10;display:flex;flex-direction:column}

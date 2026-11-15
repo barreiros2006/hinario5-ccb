@@ -10,20 +10,28 @@ const FINAIS = [
   { n: 6, tom: 'Si♭', arq: 'final6.pdf' },
   { n: 7, tom: 'Dó',  arq: 'final7.pdf' }
 ];
-const CATEGORIAS = ['Culto oficial', 'Jovens e menores', 'Santa Ceia', 'Batismo', 'Funeral', 'Coros'];
+// Nome exibido de cada aba (a chave é a "categoria" do hinos.json)
+const NOME_ABA = {
+  'Culto oficial': 'Hinos culto oficial',
+  'Jovens e menores': 'Hinos jovens e menores',
+  'Santa Ceia': 'Hinos Santa Ceia',
+  'Funeral': 'Hinos funeral',
+  'Batismo': 'Hinos batismo',
+  'Coros': 'Coros'
+};
 
 let hinos = [], visiveis = [], atual = null;
 const fav = new Set(JSON.parse(localStorage.getItem('h5fav') || '[]'));
 let tamFonte = parseFloat(localStorage.getItem('h5fonte') || '1.15');
 let arqAtual = localStorage.getItem('h5arq') || FINAIS[0].arq;
 let zoomHino = parseFloat(localStorage.getItem('h5zoom') || '1');
+let abaAtual = localStorage.getItem('h5aba') || 'Culto oficial';
 let modoPartitura = false;
 
 const rotulo = h => h.categoria === 'Coros' ? `Coro ${h.numero}` : h.numero;
 
 /* ---------- Início ---------- */
 async function init() {
-  CATEGORIAS.forEach(c => $('categoria').add(new Option(c, c)));
   FINAIS.forEach(f => $('tom').add(new Option(`Final ${f.n} (${f.tom})`, f.arq)));
   $('tom').value = arqAtual;
   renderFinais();
@@ -32,44 +40,90 @@ async function init() {
   try {
     hinos = await (await fetch('./dados/hinos.json', { cache: 'no-cache' })).json();
   } catch { hinos = []; }
-  // índice de busca: número, título e letra sem acentos
   hinos.forEach(h => h._busca = norm(h.titulo + ' ' + h.estrofes.map(e => e.texto).join(' ')));
-  renderLista();
+  if (!(abaAtual in NOME_ABA) && abaAtual !== 'finais') abaAtual = 'Culto oficial';
+  trocarAba(abaAtual);
 }
 
+/* ---------- Abas ---------- */
+function trocarAba(aba) {
+  abaAtual = aba;
+  localStorage.setItem('h5aba', aba);
+  document.querySelectorAll('#abas button').forEach(b => {
+    const ativa = b.dataset.aba === aba;
+    b.classList.toggle('ativa', ativa);
+    if (ativa) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+  const ehPartituras = aba === 'finais';
+  $('abaFinais').hidden = !ehPartituras;
+  $('abaHinos').hidden = ehPartituras;
+  if (!ehPartituras) {
+    if (!$('detalhe').hidden) { $('detalhe').hidden = true; $('filtros').hidden = $('lista').hidden = $('tituloLista').hidden = false; }
+    renderLista();
+  }
+  scrollTo(0, 0);
+}
+
+document.querySelectorAll('#abas button').forEach(b => b.onclick = () => {
+  if (!$('detalhe').hidden) history.back(); // sai do hino aberto
+  trocarAba(b.dataset.aba);
+});
+
 /* ---------- Lista ---------- */
-function renderLista() {
+function filtra(lista) {
   const q = norm($('busca').value.trim());
-  const cat = $('categoria').value;
   const soNumero = /^\d+$/.test(q);
-  visiveis = hinos.filter(h =>
-    (!cat || h.categoria === cat) &&
+  const r = lista.filter(h =>
     (!$('favOnly').checked || fav.has(h.id)) &&
     (!q || (soNumero ? String(h.numero).startsWith(q) : h._busca.includes(q)))
   );
-  if (soNumero) visiveis.sort((a, b) => (String(b.numero) === q) - (String(a.numero) === q));
+  if (soNumero) r.sort((a, b) => (String(b.numero) === q) - (String(a.numero) === q));
+  return r;
+}
+
+function renderLista() {
+  visiveis = filtra(hinos.filter(h => h.categoria === abaAtual));
   const lista = $('lista');
   lista.innerHTML = '';
   const frag = document.createDocumentFragment();
   visiveis.forEach(h => {
     const b = document.createElement('button');
     b.className = 'item';
-    b.innerHTML = `<b>${rotulo(h)}</b> ${esc(h.titulo)}${fav.has(h.id) ? ' ★' : ''}` +
-      (cat ? '' : `<small>${esc(h.categoria)}</small>`);
+    b.innerHTML = `<b>${rotulo(h)}</b><span>${esc(h.titulo)}${fav.has(h.id) ? ' ★' : ''}</span>`;
     b.onclick = () => abrirHino(h, true);
     frag.append(b);
   });
   lista.append(frag);
-  $('vazio').hidden = visiveis.length > 0;
-  $('vazio').textContent = hinos.length ? 'Nenhum hino encontrado.' : 'Não foi possível carregar os hinos. Verifique a internet e recarregue.';
-  $('tituloLista').textContent = `Hinos (${visiveis.length})`;
+  $('tituloLista').textContent = `${NOME_ABA[abaAtual]} (${visiveis.length})`;
+
+  const vazio = $('vazio');
+  vazio.hidden = visiveis.length > 0;
+  if (visiveis.length) return;
+  if (!hinos.length) { vazio.textContent = 'Não foi possível carregar os hinos. Verifique a internet e recarregue.'; return; }
+  // Nada nesta aba: mostra em quais outras abas a busca encontrou resultados
+  vazio.innerHTML = 'Nenhum hino encontrado nesta aba.';
+  const outras = Object.keys(NOME_ABA)
+    .filter(c => c !== abaAtual)
+    .map(c => [c, filtra(hinos.filter(h => h.categoria === c)).length])
+    .filter(([, n]) => n > 0);
+  if (outras.length) {
+    const box = document.createElement('div');
+    box.className = 'outras';
+    outras.forEach(([c, n]) => {
+      const b = document.createElement('button');
+      b.textContent = `${NOME_ABA[c]} (${n})`;
+      b.onclick = () => trocarAba(c);
+      box.append(b);
+    });
+    vazio.append(document.createElement('br'), 'Encontrado em:', box);
+  }
 }
 
 /* ---------- Hino ---------- */
 function abrirHino(h, empilhar) {
   atual = h;
   $('titulo').textContent = `${rotulo(h)} — ${h.titulo}`;
-  $('catHino').textContent = h.categoria;
+  $('catHino').textContent = NOME_ABA[h.categoria];
   const t = $('texto');
   t.innerHTML = '';
   let n = 0;
@@ -100,8 +154,6 @@ function mostrarModo() {
   $('tom').hidden = !part;
   $('verPartitura').classList.toggle('ativo', part);
   $('verPartitura').textContent = part ? '📖 Letra' : '🎼 Partitura';
-  $('fonteMenos').setAttribute('aria-label', part ? 'Diminuir zoom' : 'Diminuir letra');
-  $('fonteMais').setAttribute('aria-label', part ? 'Aumentar zoom' : 'Aumentar letra');
   if (part) desenharPartitura(atual);
 }
 
@@ -206,7 +258,7 @@ function renderFinais() {
   FINAIS.forEach(f => {
     const b = document.createElement('button');
     b.className = 'item';
-    b.innerHTML = `<b>Final ${f.n}</b> ${f.tom}`;
+    b.innerHTML = `<b>Final ${f.n}</b><span>${f.tom}</span>`;
     b.onclick = () => abrirFinal(f);
     l.append(b);
   });
@@ -240,17 +292,9 @@ async function desenharVisor() {
 
 function fecharVisor() { $('visor').hidden = true; $('visorPaginas').innerHTML = ''; pdfVisor = null; }
 
-/* ---------- Abas ---------- */
-document.querySelectorAll('.abas button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.abas button').forEach(x => x.classList.toggle('ativa', x === b));
-  $('abaHinos').hidden = b.dataset.aba !== 'hinos';
-  $('abaFinais').hidden = b.dataset.aba !== 'finais';
-});
-
 /* ---------- Eventos ---------- */
 let tBusca;
 $('busca').oninput = () => { clearTimeout(tBusca); tBusca = setTimeout(renderLista, 150); };
-$('categoria').onchange = renderLista;
 $('favOnly').onchange = renderLista;
 $('voltar').onclick = () => history.back();
 $('visorFechar').onclick = () => history.back();
