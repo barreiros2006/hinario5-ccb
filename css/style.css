@@ -1,83 +1,53 @@
-/* =========================
-   CABEÇALHO
-   ========================= */
-header{
-    background:#173b32;
-    color:#fff;
-    padding:20px max(18px, calc((100% - 800px)/2)) 0;
-    padding-top:max(20px, env(safe-area-inset-top));
-    position:sticky;
-    top:0;
-    z-index:5;
-}
-/* Hinário 5 + Congregação Cristã No Brasil */
-h1{
-    margin:0 0 12px;
-    display:flex;
-    align-items:baseline;
-    gap:8px;
-    white-space:nowrap;
-    font-size:1.7rem;
-    line-height:1.2;
-}
-/* Congregação Cristã No Brasil */
-h1 span{
-    font-size:clamp(.65rem, 2.8vw, 1rem);
-    font-weight:400;
-    white-space:nowrap;
-}
-/* =========================
-   ABAS DO CABEÇALHO
-   ========================= */
-.abas{
-    display:flex;
-    gap:4px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-}
-.abas::-webkit-scrollbar{
-    display:none;
-}
-.abas button{
-    flex:0 0 auto;
-    white-space:nowrap;
-    background:transparent;
-    color:#cfe0d8;
-    border:0;
-    border-bottom:3px solid transparent;
-    border-radius:0;
-    padding:10px 12px;
-    font-weight:600;
-    font-size:.82rem;
-    letter-spacing:.02em;
-}
-.abas button.ativa{
-    color:#fff;
-    border-bottom-color:#f2e6c8;
-}
-/* =========================
-   AJUSTE PARA CELULAR
-   ========================= */
-@media (max-width:480px){
-    header{
-        padding-left:12px;
-        padding-right:12px;
-    }
-    h1{
-        gap:6px;
-        font-size:1.45rem;
-    }
-    h1 span{
-        font-size:clamp(.58rem, 2.7vw, .78rem);
-    }
-    .abas button{
-        padding:9px 10px;
-        font-size:.74rem;
-    }
-}
-/* Ao abrir um hino, oculta o cabeçalho */
-body.emHino header{
-    display:none;
-}
+*{box-sizing:border-box}
+body{margin:0;background:#000000;color:#203029;font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#173b32;color:#fff;padding:20px max(18px,calc((100% - 800px)/2)) 0;padding-top:max(20px,env(safe-area-inset-top));position:sticky;top:0;z-index:5}
+h1{margin:0 0 12px}
+h1 span{font-size:1rem;font-weight:400}
+/* Abas: uma linha só, rolam para o lado no celular */
+.abas{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.abas::-webkit-scrollbar{display:none}
+.abas button{flex:0 0 auto;white-space:nowrap;background:transparent;color:#cfe0d8;border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+.abas button.ativa{color:#fff;border-bottom-color:#f2e6c8}
+main{max-width:800px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;padding:18px;margin-bottom:22px;box-shadow:0 3px 14px #0000000c}
+label{display:block;font-weight:600;margin-bottom:8px}
+input[type=search]{width:100%;padding:12px;border:1px solid #cbd5cf;border-radius:9px;font:inherit}
+.linhaFiltro{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:14px}
+.check{display:flex;align-items:center;gap:8px;margin:0}
+select{padding:10px;border:1px solid #cbd5cf;border-radius:9px;font:inherit;background:#fff;color:inherit}
+button,.item{padding:12px;border:1px solid #dce5df;border-radius:10px;background:#fff;color:inherit;cursor:pointer;font:inherit}
+.item{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;margin:8px 0}
+.item b{color:#173b32;flex:0 0 3.6em}
+.barra,.navHino{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.fonte{display:flex;gap:6px}
+.navHino{margin-top:24px}
+#titulo{margin-bottom:2px}
+#catHino{margin:0 0 12px}
+.acoesHino{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+#favorito{color:#8b6513}
+#verPartitura.ativo{background:#173b32;color:#fff}
+#texto{--tam:1.15rem;font-size:var(--tam);line-height:1.6}
+#texto .estrofe{white-space:pre-line;margin:0 0 1.1em}
+#texto .coro{font-style:italic;padding-left:1em;border-left:3px solid #c9b27a}
+#texto .rotulo{display:block;font-size:.75em;font-weight:700;color:#68766e;font-style:normal}
+#partitura{overflow-x:auto}
+#partitura canvas{display:block;margin:0 auto;background:#fff}
+#vazio .outras{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#vazio .outras button{padding:8px 12px;font-size:.9rem}
+.nota{color:#68766e}
+footer{text-align:center;padding:30px}
+/* Fundo preto: textos que ficam direto no fundo são claros */
+#tituloLista{color:#f2f5f2}
+#vazio,footer{color:#b9c4bd}
+/* Dentro do hino a faixa do topo some */
+body.emHino header{display:none}
+body.emHino main{margin-top:max(16px,env(safe-area-inset-top))}
+#visor{position:fixed;inset:0;background:#e9ece9;z-index:10;display:flex;flex-direction:column}
+#visor[hidden]{display:none}
+.visorBarra{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;background:#173b32;color:#fff;padding-top:max(10px,env(safe-area-inset-top))}
+.visorBarra button{background:#fff;color:#173b32;padding:8px 14px}
+#visorPaginas{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
+#visorPaginas canvas{display:block;margin:0 auto 10px;background:#fff;box-shadow:0 2px 8px #0002}
+.visorMsg{text-align:center;color:#68766e;margin-top:40px}
+#erroApp{position:fixed;left:0;right:0;bottom:0;background:#b3261e;color:#fff;padding:10px;font-size:14px;z-index:20}
+#erroApp[hidden]{display:none}
