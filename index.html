@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Hinário 5">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./css/style.css?v=5">
+<link rel="stylesheet" href="./css/style.css?v=7">
 <title>Hinário 5 – CCB</title>
 </head>
 <body>
@@ -25,11 +25,13 @@
   <!-- ABA HINOS -->
   <div id="abaHinos">
     <section class="card" id="filtros">
-      <label for="busca">Pesquisar por número ou título</label>
-      <input id="busca" type="search" placeholder="Ex.: 125 ou título" autocomplete="off">
+      <label for="busca">Pesquisar por número, título ou trecho da letra</label>
+      <input id="busca" type="search" placeholder="Ex.: 125, título ou trecho" autocomplete="off">
       <div class="linhaFiltro">
+        <select id="categoria" aria-label="Categoria">
+          <option value="">Todas as categorias</option>
+        </select>
         <label class="check"><input id="favOnly" type="checkbox"> Só favoritos</label>
-        <select id="tom" aria-label="Arquivo"></select>
       </div>
     </section>
     <h2 id="tituloLista">Hinos</h2>
@@ -40,13 +42,19 @@
       <div class="barra">
         <button id="voltar">← Voltar</button>
         <div class="fonte">
-          <button id="zoomHMenos" aria-label="Diminuir zoom">−</button>
-          <button id="zoomHMais" aria-label="Aumentar zoom">+</button>
+          <button id="fonteMenos" aria-label="Diminuir letra">A−</button>
+          <button id="fonteMais" aria-label="Aumentar letra">A+</button>
         </div>
       </div>
       <h2 id="titulo"></h2>
-      <button id="favorito">☆ Favoritar</button>
-      <div id="partitura"></div>
+      <p id="catHino" class="nota"></p>
+      <div class="acoesHino">
+        <button id="favorito">☆ Favoritar</button>
+        <button id="verPartitura">🎼 Partitura</button>
+        <select id="tom" aria-label="Arquivo da partitura" hidden></select>
+      </div>
+      <div id="texto"></div>
+      <div id="partitura" hidden></div>
       <div class="navHino">
         <button id="anterior">‹ Anterior</button>
         <button id="proximo">Próximo ›</button>
@@ -57,7 +65,7 @@
   <!-- ABA Partituras -->
   <div id="abaFinais" hidden>
     <section class="card">
-      <p class="nota">Toque em uma final para abrir o arquivo completo.</p>
+      <p class="nota">Toque em uma partitura para abrir o arquivo completo.</p>
       <div id="listaFinais"></div>
     </section>
   </div>
@@ -76,13 +84,13 @@
   <div id="visorPaginas"></div>
 </div>
 
-<footer>Hinário 5 – CCB · Uso pessoal · v5</footer>
+<footer>Hinário 5 – CCB · Uso pessoal · v7</footer>
 <div id="erroApp" hidden></div>
 <script>
 // Mostra na tela qualquer erro, para facilitar o diagnóstico
 addEventListener('error', e => { const d = document.getElementById('erroApp'); d.hidden = false; d.textContent = 'Erro: ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')'; });
 addEventListener('unhandledrejection', e => { const d = document.getElementById('erroApp'); d.hidden = false; d.textContent = 'Erro: ' + (e.reason && e.reason.message || e.reason); });
 </script>
-<script src="./js/app.js?v=5"></script>
+<script src="./js/app.js?v=7"></script>
 </body>
 </html>

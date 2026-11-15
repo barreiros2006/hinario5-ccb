@@ -10,16 +10,25 @@ main{max-width:800px;margin:24px auto;padding:0 16px}
 .card{background:#fff;border-radius:14px;padding:18px;margin-bottom:22px;box-shadow:0 3px 14px #0000000c}
 label{display:block;font-weight:600;margin-bottom:8px}
 input[type=search]{width:100%;padding:12px;border:1px solid #cbd5cf;border-radius:9px;font:inherit}
-.linhaFiltro{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+.linhaFiltro{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
 .check{display:flex;align-items:center;gap:8px;margin:0}
-#tom{padding:10px;border:1px solid #cbd5cf;border-radius:9px;font:inherit;background:#fff}
+select{padding:10px;border:1px solid #cbd5cf;border-radius:9px;font:inherit;background:#fff;color:inherit}
 button,.item{padding:12px;border:1px solid #dce5df;border-radius:10px;background:#fff;color:inherit;cursor:pointer;font:inherit}
 .item{display:block;width:100%;text-align:left;margin:8px 0}
-.item b{color:#173b32;display:inline-block;min-width:3.2em}
+.item b{color:#173b32;display:inline-block;min-width:3.4em}
+.item small{display:block;color:#68766e;margin-left:3.4em;font-size:.8em}
 .barra,.navHino{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .fonte{display:flex;gap:6px}
-.navHino{margin-top:20px}
-#favorito{color:#8b6513;margin-bottom:12px}
+.navHino{margin-top:24px}
+#titulo{margin-bottom:2px}
+#catHino{margin:0 0 12px}
+.acoesHino{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+#favorito{color:#8b6513}
+#verPartitura.ativo{background:#173b32;color:#fff}
+#texto{--tam:1.15rem;font-size:var(--tam);line-height:1.6}
+#texto .estrofe{white-space:pre-line;margin:0 0 1.1em}
+#texto .coro{font-style:italic;padding-left:1em;border-left:3px solid #c9b27a}
+#texto .rotulo{display:block;font-size:.75em;font-weight:700;color:#68766e;font-style:normal}
 #partitura{overflow-x:auto}
 #partitura canvas{display:block;margin:0 auto;background:#fff}
 .nota{color:#68766e}

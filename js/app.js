@@ -10,11 +10,115 @@ const FINAIS = [
   { n: 6, tom: 'Si♭', arq: 'final6.pdf' },
   { n: 7, tom: 'Dó',  arq: 'final7.pdf' }
 ];
+const CATEGORIAS = ['Culto oficial', 'Jovens e menores', 'Santa Ceia', 'Batismo', 'Funeral', 'Coros'];
 
 let hinos = [], visiveis = [], atual = null;
 const fav = new Set(JSON.parse(localStorage.getItem('h5fav') || '[]'));
+let tamFonte = parseFloat(localStorage.getItem('h5fonte') || '1.15');
 let arqAtual = localStorage.getItem('h5arq') || FINAIS[0].arq;
 let zoomHino = parseFloat(localStorage.getItem('h5zoom') || '1');
+let modoPartitura = false;
+
+const rotulo = h => h.categoria === 'Coros' ? `Coro ${h.numero}` : h.numero;
+
+/* ---------- Início ---------- */
+async function init() {
+  CATEGORIAS.forEach(c => $('categoria').add(new Option(c, c)));
+  FINAIS.forEach(f => $('tom').add(new Option(`Final ${f.n} (${f.tom})`, f.arq)));
+  $('tom').value = arqAtual;
+  renderFinais();
+  aplicarFonte();
+  history.replaceState({ tela: 'lista' }, '');
+  try {
+    hinos = await (await fetch('./dados/hinos.json', { cache: 'no-cache' })).json();
+  } catch { hinos = []; }
+  // índice de busca: número, título e letra sem acentos
+  hinos.forEach(h => h._busca = norm(h.titulo + ' ' + h.estrofes.map(e => e.texto).join(' ')));
+  renderLista();
+}
+
+/* ---------- Lista ---------- */
+function renderLista() {
+  const q = norm($('busca').value.trim());
+  const cat = $('categoria').value;
+  const soNumero = /^\d+$/.test(q);
+  visiveis = hinos.filter(h =>
+    (!cat || h.categoria === cat) &&
+    (!$('favOnly').checked || fav.has(h.id)) &&
+    (!q || (soNumero ? String(h.numero).startsWith(q) : h._busca.includes(q)))
+  );
+  if (soNumero) visiveis.sort((a, b) => (String(b.numero) === q) - (String(a.numero) === q));
+  const lista = $('lista');
+  lista.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  visiveis.forEach(h => {
+    const b = document.createElement('button');
+    b.className = 'item';
+    b.innerHTML = `<b>${rotulo(h)}</b> ${esc(h.titulo)}${fav.has(h.id) ? ' ★' : ''}` +
+      (cat ? '' : `<small>${esc(h.categoria)}</small>`);
+    b.onclick = () => abrirHino(h, true);
+    frag.append(b);
+  });
+  lista.append(frag);
+  $('vazio').hidden = visiveis.length > 0;
+  $('vazio').textContent = hinos.length ? 'Nenhum hino encontrado.' : 'Não foi possível carregar os hinos. Verifique a internet e recarregue.';
+  $('tituloLista').textContent = `Hinos (${visiveis.length})`;
+}
+
+/* ---------- Hino ---------- */
+function abrirHino(h, empilhar) {
+  atual = h;
+  $('titulo').textContent = `${rotulo(h)} — ${h.titulo}`;
+  $('catHino').textContent = h.categoria;
+  const t = $('texto');
+  t.innerHTML = '';
+  let n = 0;
+  h.estrofes.forEach(p => {
+    const d = document.createElement('p');
+    const coro = p.tipo === 'coro';
+    d.className = 'estrofe' + (coro ? ' coro' : '');
+    const r = h.categoria === 'Coros' ? '' : `<span class="rotulo">${coro ? 'Coro' : ++n}</span>`;
+    d.innerHTML = r + esc(p.texto);
+    t.append(d);
+  });
+  atualizarFavBtn();
+  $('verPartitura').hidden = h.categoria === 'Coros';
+  const i = visiveis.indexOf(h);
+  $('anterior').disabled = i <= 0;
+  $('proximo').disabled = i < 0 || i >= visiveis.length - 1;
+  $('filtros').hidden = $('lista').hidden = $('vazio').hidden = $('tituloLista').hidden = true;
+  $('detalhe').hidden = false;
+  scrollTo(0, 0);
+  if (empilhar) history.pushState({ tela: 'hino' }, '');
+  mostrarModo();
+}
+
+function mostrarModo() {
+  const part = modoPartitura && atual && atual.categoria !== 'Coros';
+  $('texto').hidden = part;
+  $('partitura').hidden = !part;
+  $('tom').hidden = !part;
+  $('verPartitura').classList.toggle('ativo', part);
+  $('verPartitura').textContent = part ? '📖 Letra' : '🎼 Partitura';
+  $('fonteMenos').setAttribute('aria-label', part ? 'Diminuir zoom' : 'Diminuir letra');
+  $('fonteMais').setAttribute('aria-label', part ? 'Aumentar zoom' : 'Aumentar letra');
+  if (part) desenharPartitura(atual);
+}
+
+function fecharHino() {
+  $('detalhe').hidden = true;
+  $('filtros').hidden = $('lista').hidden = $('tituloLista').hidden = false;
+  renderLista();
+}
+
+function atualizarFavBtn() {
+  $('favorito').textContent = fav.has(atual.id) ? '★ Remover favorito' : '☆ Favoritar';
+}
+
+function aplicarFonte() {
+  $('texto').style.setProperty('--tam', tamFonte + 'rem');
+  localStorage.setItem('h5fonte', tamFonte);
+}
 
 /* ---------- PDF.js ---------- */
 let pdfjs = null;
@@ -30,7 +134,6 @@ async function carregarPdfjs() {
 async function abrirPdf(arq) {
   if (!pdfsAbertos[arq]) {
     const lib = await carregarPdfjs();
-    // Download inteiro (sem pedaços) para o arquivo ficar no cache e funcionar offline
     pdfsAbertos[arq] = lib.getDocument({ url: './finais/' + arq, disableRange: true, disableStream: true }).promise
       .catch(e => { delete pdfsAbertos[arq]; throw e; });
   }
@@ -49,124 +152,52 @@ async function desenharPagina(pdf, n, largura, zoom) {
   return c;
 }
 
-/* ---------- Índice automático: lê o PDF e acha a página de cada hino ---------- */
+/* Índice (nº do hino -> página do PDF), montado 1 vez por arquivo e guardado no aparelho */
 const VERSAO_INDICE = 1;
-async function obterIndice(arq) {
+async function obterIndice(arq, aviso) {
   const chave = `h5idx${VERSAO_INDICE}_${arq}`;
   const salvo = localStorage.getItem(chave);
   if (salvo) return JSON.parse(salvo);
-  $('lista').innerHTML = '';
-  $('vazio').hidden = false;
-  $('vazio').textContent = 'Preparando o hinário (só na primeira vez)…';
-  try {
-    const pdf = await abrirPdf(arq);
-    const lista = [], vistos = new Set();
-    for (let i = 1; i <= pdf.numPages; i++) {
-      if (i % 5 === 0) $('vazio').textContent = `Preparando o hinário… página ${i} de ${pdf.numPages}`;
-      const tc = await (await pdf.getPage(i)).getTextContent();
-      const textos = tc.items.map(t => t.str.trim()).filter(Boolean);
-      const m = achaCabecalho(textos);
-      if (m && !vistos.has(m.numero)) {
-        vistos.add(m.numero);
-        lista.push({ ...m, pagina: i });
-      }
-    }
-    lista.sort((a, b) => a.numero - b.numero);
-    if (lista.length) localStorage.setItem(chave, JSON.stringify(lista));
-    return lista;
-  } catch {
-    return [];
+  const pdf = await abrirPdf(arq);
+  const mapa = {};
+  for (let i = 1; i <= pdf.numPages; i++) {
+    if (aviso && i % 5 === 0) aviso(`Preparando as partituras (só na primeira vez)… página ${i} de ${pdf.numPages}`);
+    const tc = await (await pdf.getPage(i)).getTextContent();
+    const textos = tc.items.map(t => t.str.trim()).filter(Boolean);
+    const n = achaNumero(textos);
+    if (n && !mapa[n]) mapa[n] = i;
   }
+  if (Object.keys(mapa).length) localStorage.setItem(chave, JSON.stringify(mapa));
+  return mapa;
 }
-// Cabeçalho da página: "12 Sempre em Jesus confiarei" (número e título podem vir em itens separados)
-function achaCabecalho(textos) {
+function achaNumero(textos) {
   for (let k = 0; k < Math.min(textos.length, 4); k++) {
-    let m = textos[k].replace(/\s+/g, ' ').match(/^(\d{1,3}) ([^\d].*)$/);
-    if (m) return { numero: +m[1], titulo: m[2].trim() };
-    if (/^\d{1,3}$/.test(textos[k]) && textos[k + 1] && /^[^\d]/.test(textos[k + 1])) {
-      return { numero: +textos[k], titulo: textos[k + 1].replace(/\s+/g, ' ').trim() };
-    }
+    const m = textos[k].replace(/\s+/g, ' ').match(/^(\d{1,3}) [^\d]/);
+    if (m) return +m[1];
+    if (/^\d{1,3}$/.test(textos[k]) && textos[k + 1] && /^[^\d]/.test(textos[k + 1])) return +textos[k];
   }
   return null;
 }
 
-/* ---------- Início ---------- */
-async function init() {
-  renderFinais();
-  montarSeletor();
-  history.replaceState({ tela: 'lista' }, '');
-  hinos = await obterIndice(arqAtual);
-  renderLista();
-}
-
-function montarSeletor() {
-  const sel = $('tom');
-  FINAIS.forEach(f => sel.add(new Option(`Final ${f.n} (${f.tom})`, f.arq)));
-  sel.value = arqAtual;
-  sel.onchange = async () => {
-    arqAtual = sel.value;
-    localStorage.setItem('h5arq', arqAtual);
-    hinos = await obterIndice(arqAtual);
-    renderLista();
-  };
-}
-
-/* ---------- Lista ---------- */
-function renderLista() {
-  const q = norm($('busca').value.trim());
-  visiveis = hinos.filter(h =>
-    (!q || String(h.numero).startsWith(q) || norm(h.titulo).includes(q)) &&
-    (!$('favOnly').checked || fav.has(String(h.numero)))
-  );
-  const lista = $('lista');
-  lista.innerHTML = '';
-  visiveis.forEach(h => {
-    const b = document.createElement('button');
-    b.className = 'item';
-    b.innerHTML = `<b>${h.numero}</b> ${esc(h.titulo)}${fav.has(String(h.numero)) ? ' ★' : ''}`;
-    b.onclick = () => abrirHino(h, true);
-    lista.append(b);
-  });
-  $('vazio').hidden = visiveis.length > 0;
-  $('vazio').textContent = hinos.length ? 'Nenhum hino encontrado.' : 'Não foi possível ler o hinário. Verifique a internet e recarregue.';
-  $('tituloLista').textContent = `Hinos (${visiveis.length})`;
-}
-
-/* ---------- Hino: mostra a página da partitura ---------- */
-async function abrirHino(h, empilhar) {
-  atual = h;
-  $('titulo').textContent = `${h.numero} — ${h.titulo}`;
-  atualizarFavBtn();
-  const i = visiveis.indexOf(h);
-  $('anterior').disabled = i <= 0;
-  $('proximo').disabled = i < 0 || i >= visiveis.length - 1;
-  $('filtros').hidden = $('lista').hidden = $('vazio').hidden = $('tituloLista').hidden = true;
-  $('detalhe').hidden = false;
-  if (empilhar) { scrollTo(0, 0); history.pushState({ tela: 'hino' }, ''); }
+async function desenharPartitura(h) {
   const area = $('partitura');
-  area.innerHTML = '<p class="visorMsg">Carregando partitura…</p>';
+  const msg = t => { if (atual === h) area.innerHTML = `<p class="visorMsg">${t}</p>`; };
+  msg('Carregando partitura…');
   try {
+    const mapa = await obterIndice(arqAtual, msg);
+    const pagina = mapa[h.numero];
+    if (!pagina) return msg('Partitura deste hino não encontrada neste arquivo.');
     const pdf = await abrirPdf(arqAtual);
-    const c = await desenharPagina(pdf, h.pagina, area.clientWidth, zoomHino);
-    if (atual !== h) return;
+    const c = await desenharPagina(pdf, pagina, area.clientWidth || 600, zoomHino);
+    if (atual !== h || !modoPartitura) return;
     area.innerHTML = '';
     area.append(c);
   } catch {
-    area.innerHTML = '<p class="visorMsg">Não foi possível abrir a partitura.</p>';
+    msg('Não foi possível abrir a partitura. Verifique a internet na primeira abertura.');
   }
 }
 
-function fecharHino() {
-  $('detalhe').hidden = true;
-  $('filtros').hidden = $('lista').hidden = $('tituloLista').hidden = false;
-  renderLista();
-}
-
-function atualizarFavBtn() {
-  $('favorito').textContent = fav.has(String(atual.numero)) ? '★ Remover favorito' : '☆ Favoritar';
-}
-
-/* ---------- Aba Finais: PDF completo ---------- */
+/* ---------- Aba Partituras: PDF completo ---------- */
 let pdfVisor = null, zoom = 1;
 
 function renderFinais() {
@@ -217,22 +248,31 @@ document.querySelectorAll('.abas button').forEach(b => b.onclick = () => {
 });
 
 /* ---------- Eventos ---------- */
-$('busca').oninput = renderLista;
+let tBusca;
+$('busca').oninput = () => { clearTimeout(tBusca); tBusca = setTimeout(renderLista, 150); };
+$('categoria').onchange = renderLista;
 $('favOnly').onchange = renderLista;
 $('voltar').onclick = () => history.back();
 $('visorFechar').onclick = () => history.back();
+$('verPartitura').onclick = () => { modoPartitura = !modoPartitura; mostrarModo(); };
+$('tom').onchange = () => { arqAtual = $('tom').value; localStorage.setItem('h5arq', arqAtual); mostrarModo(); };
 $('zoomMais').onclick = () => { zoom = Math.min(3, zoom + 0.25); desenharVisor(); };
 $('zoomMenos').onclick = () => { zoom = Math.max(0.5, zoom - 0.25); desenharVisor(); };
-$('zoomHMais').onclick = () => { zoomHino = Math.min(3, zoomHino + 0.25); localStorage.setItem('h5zoom', zoomHino); abrirHino(atual, false); };
-$('zoomHMenos').onclick = () => { zoomHino = Math.max(1, zoomHino - 0.25); localStorage.setItem('h5zoom', zoomHino); abrirHino(atual, false); };
+$('fonteMais').onclick = () => {
+  if (modoPartitura) { zoomHino = Math.min(3, zoomHino + 0.25); localStorage.setItem('h5zoom', zoomHino); desenharPartitura(atual); }
+  else { tamFonte = Math.min(2.4, +(tamFonte + 0.1).toFixed(2)); aplicarFonte(); }
+};
+$('fonteMenos').onclick = () => {
+  if (modoPartitura) { zoomHino = Math.max(1, zoomHino - 0.25); localStorage.setItem('h5zoom', zoomHino); desenharPartitura(atual); }
+  else { tamFonte = Math.max(0.9, +(tamFonte - 0.1).toFixed(2)); aplicarFonte(); }
+};
 $('favorito').onclick = () => {
-  const n = String(atual.numero);
-  fav.has(n) ? fav.delete(n) : fav.add(n);
+  fav.has(atual.id) ? fav.delete(atual.id) : fav.add(atual.id);
   localStorage.setItem('h5fav', JSON.stringify([...fav]));
   atualizarFavBtn();
 };
-$('anterior').onclick = () => { const i = visiveis.indexOf(atual); if (i > 0) { abrirHino(visiveis[i - 1], false); scrollTo(0, 0); } };
-$('proximo').onclick = () => { const i = visiveis.indexOf(atual); if (i < visiveis.length - 1) { abrirHino(visiveis[i + 1], false); scrollTo(0, 0); } };
+$('anterior').onclick = () => { const i = visiveis.indexOf(atual); if (i > 0) abrirHino(visiveis[i - 1], false); };
+$('proximo').onclick = () => { const i = visiveis.indexOf(atual); if (i < visiveis.length - 1) abrirHino(visiveis[i + 1], false); };
 
 // Botão Voltar do Android
 addEventListener('popstate', () => {

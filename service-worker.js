@@ -1,7 +1,7 @@
-// Ao publicar qualquer alteração, aumente a versão abaixo (v5 -> v6...)
-const C = 'h5-ccb-v5';
-const A = ['./','./index.html','./css/style.css?v=5','./js/app.js?v=5','./manifest.json',
-           './icons/icon-192.png','./icons/icon-512.png',
+// Ao publicar qualquer alteração, aumente a versão abaixo (v7 -> v8...)
+const C = 'h5-ccb-v7';
+const A = ['./','./index.html','./css/style.css?v=7','./js/app.js?v=7','./manifest.json',
+           './dados/hinos.json','./icons/icon-192.png','./icons/icon-512.png',
            './js/pdfjs/pdf.min.mjs','./js/pdfjs/pdf.worker.min.mjs',
            './finais/final1.pdf','./finais/final2.pdf','./finais/final3.pdf','./finais/final4.pdf',
            './finais/final5.pdf','./finais/final6.pdf','./finais/final7.pdf'];
@@ -18,6 +18,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     // no-cache: sempre confere com o servidor se há versão nova
     fetch(e.request.mode === 'navigate' ? e.request : new Request(e.request, { cache: 'no-cache' })).then(r => {
