@@ -27,7 +27,10 @@
     <section class="card" id="filtros">
       <label for="busca">Pesquisar por número ou título</label>
       <input id="busca" type="search" placeholder="Ex.: 125 ou título" autocomplete="off">
-      <label class="check"><input id="favOnly" type="checkbox"> Só favoritos</label>
+      <div class="linhaFiltro">
+        <label class="check"><input id="favOnly" type="checkbox"> Só favoritos</label>
+        <select id="tom" aria-label="Arquivo"></select>
+      </div>
     </section>
     <h2 id="tituloLista">Hinos</h2>
     <div id="lista"></div>
@@ -37,13 +40,13 @@
       <div class="barra">
         <button id="voltar">← Voltar</button>
         <div class="fonte">
-          <button id="fonteMenos" aria-label="Diminuir letra">A−</button>
-          <button id="fonteMais" aria-label="Aumentar letra">A+</button>
+          <button id="zoomHMenos" aria-label="Diminuir zoom">−</button>
+          <button id="zoomHMais" aria-label="Aumentar zoom">+</button>
         </div>
       </div>
       <h2 id="titulo"></h2>
       <button id="favorito">☆ Favoritar</button>
-      <div id="texto"></div>
+      <div id="partitura"></div>
       <div class="navHino">
         <button id="anterior">‹ Anterior</button>
         <button id="proximo">Próximo ›</button>
@@ -54,13 +57,13 @@
   <!-- ABA FINAIS -->
   <div id="abaFinais" hidden>
     <section class="card">
-      <p class="nota">Toque em uma final para abrir a partitura.</p>
+      <p class="nota">Toque em uma final para abrir o arquivo completo.</p>
       <div id="listaFinais"></div>
     </section>
   </div>
 </main>
 
-<!-- Visualizador de partitura -->
+<!-- Visualizador do PDF completo -->
 <div id="visor" hidden>
   <div class="visorBarra">
     <button id="visorFechar">← Fechar</button>
@@ -73,7 +76,7 @@
   <div id="visorPaginas"></div>
 </div>
 
-<footer>Hinário 5 – CCB · Uso pessoal · v3</footer>
+<footer>Hinário 5 – CCB · Uso pessoal · v4</footer>
 <script src="./js/app.js"></script>
 </body>
 </html>
