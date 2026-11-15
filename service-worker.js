@@ -1,6 +1,6 @@
-// Ao publicar qualquer alteração, aumente a versão abaixo (v8 -> v9...)
-const C = 'h5-ccb-v8';
-const A = ['./','./index.html','./css/style.css?v=8','./js/app.js?v=8','./manifest.json',
+// Ao publicar qualquer alteração, aumente a versão abaixo (v9 -> v10...)
+const C = 'h5-ccb-v9';
+const A = ['./','./index.html','./css/style.css?v=9','./js/app.js?v=9','./manifest.json',
            './dados/hinos.json','./icons/icon-192.png','./icons/icon-512.png',
            './js/pdfjs/pdf.min.mjs','./js/pdfjs/pdf.worker.min.mjs',
            './finais/final1.pdf','./finais/final2.pdf','./finais/final3.pdf','./finais/final4.pdf',

@@ -12,11 +12,11 @@ const FINAIS = [
 ];
 // Nome exibido de cada aba (a chave é a "categoria" do hinos.json)
 const NOME_ABA = {
-  'Culto oficial': 'Hinos culto oficial',
-  'Jovens e menores': 'Hinos jovens e menores',
-  'Santa Ceia': 'Hinos Santa Ceia',
-  'Funeral': 'Hinos funeral',
-  'Batismo': 'Hinos batismo',
+  'Culto oficial': 'Culto oficial',
+  'Jovens e menores': 'Culto jovens e menores',
+  'Santa Ceia': 'Santa Ceia',
+  'Funeral': 'Funeral',
+  'Batismo': 'Batismo',
   'Coros': 'Coros'
 };
 
