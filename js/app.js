@@ -58,6 +58,7 @@ function trocarAba(aba) {
   $('abaFinais').hidden = !ehPartituras;
   $('abaHinos').hidden = ehPartituras;
   if (!ehPartituras) {
+    document.body.classList.remove('emHino');
     if (!$('detalhe').hidden) { $('detalhe').hidden = true; $('filtros').hidden = $('lista').hidden = $('tituloLista').hidden = false; }
     renderLista();
   }
@@ -65,7 +66,7 @@ function trocarAba(aba) {
 }
 
 document.querySelectorAll('#abas button').forEach(b => b.onclick = () => {
-  if (!$('detalhe').hidden) history.back(); // sai do hino aberto
+  if (!$('detalhe').hidden) history.back();
   trocarAba(b.dataset.aba);
 });
 
@@ -100,7 +101,6 @@ function renderLista() {
   vazio.hidden = visiveis.length > 0;
   if (visiveis.length) return;
   if (!hinos.length) { vazio.textContent = 'Não foi possível carregar os hinos. Verifique a internet e recarregue.'; return; }
-  // Nada nesta aba: mostra em quais outras abas a busca encontrou resultados
   vazio.innerHTML = 'Nenhum hino encontrado nesta aba.';
   const outras = Object.keys(NOME_ABA)
     .filter(c => c !== abaAtual)
@@ -142,6 +142,7 @@ function abrirHino(h, empilhar) {
   $('proximo').disabled = i < 0 || i >= visiveis.length - 1;
   $('filtros').hidden = $('lista').hidden = $('vazio').hidden = $('tituloLista').hidden = true;
   $('detalhe').hidden = false;
+  document.body.classList.add('emHino'); // esconde a faixa do topo
   scrollTo(0, 0);
   if (empilhar) history.pushState({ tela: 'hino' }, '');
   mostrarModo();
@@ -159,6 +160,7 @@ function mostrarModo() {
 
 function fecharHino() {
   $('detalhe').hidden = true;
+  document.body.classList.remove('emHino'); // mostra a faixa do topo de novo
   $('filtros').hidden = $('lista').hidden = $('tituloLista').hidden = false;
   renderLista();
 }

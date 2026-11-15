@@ -1,7 +1,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:#000000;color:#203029;font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:#f2f5f2;color:#fff;padding:24px max(18px,calc((100% - 800px)/2)) 0;padding-top:max(24px,env(safe-area-inset-top));position:sticky;top:0;z-index:5}
-h1{margin:4px 0 14px}
+header{background:#173b32;color:#fff;padding:20px max(18px,calc((100% - 800px)/2)) 0;padding-top:max(20px,env(safe-area-inset-top));position:sticky;top:0;z-index:5}
+h1{margin:0 0 12px}
 h1 span{font-size:1rem;font-weight:400}
 /* Abas: uma linha só, rolam para o lado no celular */
 .abas{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -32,11 +32,16 @@ button,.item{padding:12px;border:1px solid #dce5df;border-radius:10px;background
 #texto .rotulo{display:block;font-size:.75em;font-weight:700;color:#68766e;font-style:normal}
 #partitura{overflow-x:auto}
 #partitura canvas{display:block;margin:0 auto;background:#fff}
-#vazio{color:#68766e}
 #vazio .outras{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 #vazio .outras button{padding:8px 12px;font-size:.9rem}
 .nota{color:#68766e}
-footer{text-align:center;padding:30px;color:#68766e}
+footer{text-align:center;padding:30px}
+/* Fundo preto: textos que ficam direto no fundo são claros */
+#tituloLista{color:#f2f5f2}
+#vazio,footer{color:#b9c4bd}
+/* Dentro do hino a faixa do topo some */
+body.emHino header{display:none}
+body.emHino main{margin-top:max(16px,env(safe-area-inset-top))}
 #visor{position:fixed;inset:0;background:#e9ece9;z-index:10;display:flex;flex-direction:column}
 #visor[hidden]{display:none}
 .visorBarra{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;background:#173b32;color:#fff;padding-top:max(10px,env(safe-area-inset-top))}

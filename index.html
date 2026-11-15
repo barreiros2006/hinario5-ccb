@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Hinário 5">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./css/style.css?v=9">
+<link rel="stylesheet" href="./css/style.css?v=10">
 <title>Hinário 5 – CCB</title>
 </head>
 <body>
@@ -85,13 +85,13 @@
   <div id="visorPaginas"></div>
 </div>
 
-<footer>Hinário 5 – CCB · Uso pessoal · v9</footer>
+<footer>Hinário 5 – CCB · Uso pessoal · v10</footer>
 <div id="erroApp" hidden></div>
 <script>
 // Mostra na tela qualquer erro, para facilitar o diagnóstico
 addEventListener('error', e => { const d = document.getElementById('erroApp'); d.hidden = false; d.textContent = 'Erro: ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')'; });
 addEventListener('unhandledrejection', e => { const d = document.getElementById('erroApp'); d.hidden = false; d.textContent = 'Erro: ' + (e.reason && e.reason.message || e.reason); });
 </script>
-<script src="./js/app.js?v=9"></script>
+<script src="./js/app.js?v=10"></script>
 </body>
 </html>
