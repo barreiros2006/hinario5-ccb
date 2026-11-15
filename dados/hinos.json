@@ -1,0 +1,11 @@
+[
+  {
+    "numero": 0,
+    "titulo": "Modelo de exemplo (apague e cadastre os hinos)",
+    "estrofes": [
+      { "tipo": "estrofe", "texto": "Primeira linha da 1ª estrofe\nSegunda linha\nTerceira linha\nQuarta linha" },
+      { "tipo": "coro",    "texto": "Linha do coro\nOutra linha do coro" },
+      { "tipo": "estrofe", "texto": "Primeira linha da 2ª estrofe\nSegunda linha" }
+    ]
+  }
+]
